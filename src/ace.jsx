@@ -90,6 +90,7 @@ export default class ReactAce extends Component {
 
   componentWillReceiveProps(nextProps) {
     const oldProps = this.props;
+    let cursorPosition = this.getCurrentCursorPosition();
 
     for (let i = 0; i < editorOptions.length; i++) {
       const option = editorOptions[i];
@@ -119,8 +120,19 @@ export default class ReactAce extends Component {
     if (this.editor.getValue() !== nextProps.value) {
       // editor.setValue is a synchronous function call, change event is emitted before setValue return.
       this.silent = true;
-      this.editor.setValue(nextProps.value, nextProps.cursorStart);
+      this.editor.setValue(nextProps.value, -1);
+        if (cursorPosition && typeof cursorPosition === "object") {
+          this.editor.getSession().getSelection().selectionLead.setPosition(cursorPosition.row, cursorPosition.column);
+        }
       this.silent = false;
+    }
+  }
+
+  getCurrentCursorPosition() {
+    let pos = this.editor.selection.getCursor() || {};
+    return {
+      row: pos.row || 0,
+      column: pos.column || 0
     }
   }
 
